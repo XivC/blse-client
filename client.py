@@ -31,7 +31,9 @@ def login(user: User):
 
 
 def register(user: User):
-    request('post', 'auth/register/', user.dict(exclude_none=True))
+    data = request('post', 'auth/register/', user.dict(exclude_none=True))
+    data['password'] = user.password
+    return User.parse_obj(data)
 
 
 def create_team(name: str) -> Team:
@@ -56,14 +58,14 @@ def create_tournament(tournament: Tournament) -> Tournament:
 
 
 def refresh_tournament(tournament: Tournament) -> Tournament:
-    data = request('get', f'user/tournaments/{tournament.id}')
+    data = request('get', f'user/tournaments/{tournament.id}/')
     Tournament.update_forward_refs()
     return Tournament.parse_obj(data)
 
 
-def play_game(match: Match, winner_id: int) -> Match:
+def play_game(match: Match, winner_id: int) -> Game:
     data = request('post', f'moderator/matches/{match.id}/play-game/?winnerId={winner_id}')
-    return Match.parse_obj(data)
+    return Game.parse_obj(data)
 
 
 def drop_game(match: Match) -> Tournament:
@@ -73,13 +75,14 @@ def drop_game(match: Match) -> Tournament:
 
 
 def approve(game: Game) -> Game:
-    data = request('post', f'judge/games{game.id}/approve')
+    data = request('post', f'judge/games/{game.id}/approve/')
     return Game.parse_obj(data)
 
 
 def disapprove(game: Game) -> Game:
-    data = request('post', f'judge/games{game.id}/disapprove')
+    data = request('post', f'judge/games/{game.id}/disapprove/')
     return Game.parse_obj(data)
+
 
 def user_info() -> User:
     data = request('get', f'user/me/')
