@@ -1,8 +1,6 @@
 import json
 
 import requests
-from pydantic import BaseModel
-from requests import Response
 from requests.auth import HTTPBasicAuth
 
 from models import User, Team, Tournament
@@ -50,5 +48,8 @@ def create_tournament(tournament: Tournament) -> Tournament:
     req_data = tournament.dict(exclude_none=True)
     req_data['teamsIds'] = [t.id for t in tournament.teams]
     req_data['judgesIds'] = [u.id for u in tournament.judges]
+    req_data.pop('teams')
+    req_data.pop('judges')
     data = request('post', 'moderator/tournaments/', req_data)
+    Tournament.update_forward_refs()
     return Tournament.parse_obj(data)
