@@ -33,9 +33,8 @@ class Game(BaseModel):
 
 class Match(BaseModel):
     id: int | None
-    team1: Team | None
-    team2: Team | None
-    tournament: Tournament | None
+    team1Id: int | None
+    team2Id: int | None
     nextMatchId: int | None
     games: list[Game] | None
 

@@ -3,7 +3,7 @@ import json
 import requests
 from requests.auth import HTTPBasicAuth
 
-from models import User, Team, Tournament
+from models import User, Team, Tournament, Match, Game
 from utlis import url
 
 session = requests.session()
@@ -31,7 +31,7 @@ def login(user: User):
 
 
 def register(user: User):
-    return request('post', 'auth/register/', user.dict(exclude_none=True))
+    request('post', 'auth/register/', user.dict(exclude_none=True))
 
 
 def create_team(name: str) -> Team:
@@ -53,3 +53,34 @@ def create_tournament(tournament: Tournament) -> Tournament:
     data = request('post', 'moderator/tournaments/', req_data)
     Tournament.update_forward_refs()
     return Tournament.parse_obj(data)
+
+
+def refresh_tournament(tournament: Tournament) -> Tournament:
+    data = request('get', f'user/tournaments/{tournament.id}')
+    Tournament.update_forward_refs()
+    return Tournament.parse_obj(data)
+
+
+def play_game(match: Match, winner_id: int) -> Match:
+    data = request('post', f'moderator/matches/{match.id}/play-game/?winnerId={winner_id}')
+    return Match.parse_obj(data)
+
+
+def drop_game(match: Match) -> Tournament:
+    data = request('post', f'moderator/matches/{match.id}/drop/')
+    Tournament.update_forward_refs()
+    return Tournament.parse_obj(data)
+
+
+def approve(game: Game) -> Game:
+    data = request('post', f'judge/games{game.id}/approve')
+    return Game.parse_obj(data)
+
+
+def disapprove(game: Game) -> Game:
+    data = request('post', f'judge/games{game.id}/disapprove')
+    return Game.parse_obj(data)
+
+def user_info() -> User:
+    data = request('get', f'user/me/')
+    return User.parse_obj(data)
